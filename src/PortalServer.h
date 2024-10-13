@@ -23,6 +23,7 @@
 
 AsyncWebServer server = AsyncWebServer(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketsServer webSocketVarLog = WebSocketsServer(82);
 DNSServer dnsServer;
 #include <WiFiUdp.h>
 WiFiUDP udp;
@@ -40,6 +41,7 @@ void RequestReboot() {
 
 void UpdateServer() {
   webSocket.loop();
+  webSocketVarLog.loop();
   ArduinoOTA.handle();
 
   if (useCaptive) {
@@ -76,7 +78,8 @@ void UpdateServer() {
 void StartWebServer() {
 
   Serial.println("Start webserver");
-  udp.beginPacket(IPAddress(255,255,255,255), 1337);
+  webSocketVarLog.broadcastTXT("Hello");
+  udp.beginPacket(IPAddress(255, 255, 255, 255), 1337);
   udp.print("portalturret::discovery");
   udp.endPacket();
 
@@ -316,6 +319,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
       break;
     }
     break;
+  case WStype_TEXT:
+      // USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
+
+      // send message to client
+      // webSocket.sendTXT(num, "message here");
+
+      // send data to all connected clients
+      webSocket.broadcastTXT("message here");
+      break;
   case WStype_DISCONNECTED: // if the websocket is disconnected
     break;
   case WStype_CONNECTED: // if a new websocket connection is established
@@ -329,8 +341,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 void StartWebSocket() {
   // Start a WebSocket server
   webSocket.begin();
+  webSocketVarLog.begin();
   webSocket.onEvent(webSocketEvent); // if there's an incomming websocket
                                      // message, go to function 'webSocketEvent'
+  webSocketVarLog.onEvent(webSocketEvent); // if there's an incomming websocket
+                                           // message, go to function 'webSocketEvent'
   websocketStarted = true;
   // Serial.println("WebSocket server started.");
 }
