@@ -1,19 +1,21 @@
 #ifndef PT_ROUTINES
 #define PT_ROUTINES
 
+#include <AceRoutine.h>
 #include <Arduino.h>
 #include "LEDs.h"
 #include "Servos.h"
 #include "Settings.h"
-#include <AceRoutine.h>
 
 using namespace ace_routine;
 
 static bool fullyOpened;
 
-COROUTINE(openWingsRoutine) {
+COROUTINE(openWingsRoutine)
+{
   COROUTINE_BEGIN();
-  if (!sensors.WingsAreOpen()) {
+  if (!sensors.WingsAreOpen())
+  {
     fullyOpened = false;
     servos.SetWingAngle(settings.idleAngle - settings.wingRotateDirection * 90);
     COROUTINE_DELAY(settings.openDuration);
@@ -23,7 +25,8 @@ COROUTINE(openWingsRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(closeWingsRoutine) {
+COROUTINE(closeWingsRoutine)
+{
   COROUTINE_BEGIN();
   static unsigned long startTime;
   servos.SetRotateAngle(settings.centerAngle);
@@ -37,11 +40,13 @@ COROUTINE(closeWingsRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(activatedRoutine) {
+COROUTINE(activatedRoutine)
+{
   COROUTINE_BEGIN();
 
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -60,8 +65,10 @@ COROUTINE(activatedRoutine) {
   COROUTINE_AWAIT(!audio.IsPlayingAudio());
 #endif
 
-  if (closedAtStart) {
-    if (!sensors.WingsAreOpen()) {
+  if (closedAtStart)
+  {
+    if (!sensors.WingsAreOpen())
+    {
       fullyOpened = false;
       servos.SetWingAngle(settings.idleAngle -
                           settings.wingRotateDirection * 90);
@@ -74,11 +81,13 @@ COROUTINE(activatedRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(searchingRoutine) {
+COROUTINE(searchingRoutine)
+{
   COROUTINE_BEGIN();
 
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -86,8 +95,10 @@ COROUTINE(searchingRoutine) {
 
   static unsigned long nextAudioClipTime = 0;
 
-  while (true) {
-    if (millis() > nextAudioClipTime) {
+  while (true)
+  {
+    if (millis() > nextAudioClipTime)
+    {
       nextAudioClipTime = millis() + 5000;
 #ifdef USE_AUDIO
       audio.PlaySound(7, random(1, 11));
@@ -95,7 +106,8 @@ COROUTINE(searchingRoutine) {
     }
     float t = millis() / 1000.0;
     uint16_t s = t * 255;
-    if (fullyOpened) {
+    if (fullyOpened)
+    {
       servos.SetRotateAngle(map(constrain(inoise8_raw(s) * 2, -100, 100), -100,
                                 100,
                                 settings.centerAngle - settings.maxRotation,
@@ -107,7 +119,8 @@ COROUTINE(searchingRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(engagingRoutine) {
+COROUTINE(engagingRoutine)
+{
   COROUTINE_BEGIN();
 
   static unsigned long fromTime;
@@ -117,7 +130,8 @@ COROUTINE(engagingRoutine) {
 
   fromTime = millis();
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -135,21 +149,25 @@ COROUTINE(engagingRoutine) {
   fromTime = millis();
   toTime = fromTime + 1200;
 
-  if (fullyOpened) {
+  if (fullyOpened)
+  {
     int whatSide = random(0, 2);
     fromAngle = whatSide == 0 ? settings.centerAngle - settings.maxRotation
                               : settings.centerAngle + settings.maxRotation;
     toAngle = whatSide == 0 ? settings.centerAngle + settings.maxRotation
                             : settings.centerAngle - settings.maxRotation;
 
-    if (fullyOpened) {
+    if (fullyOpened)
+    {
       servos.SetRotateAngle(fromAngle);
     }
 
     COROUTINE_DELAY(200);
 
-    while (toTime > millis()) {
-      if (fullyOpened) {
+    while (toTime > millis())
+    {
+      if (fullyOpened)
+      {
         servos.SetRotateAngle(
             map(millis(), fromTime, toTime, fromAngle, toAngle));
       }
@@ -162,11 +180,13 @@ COROUTINE(engagingRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(targetLostRoutine) {
+COROUTINE(targetLostRoutine)
+{
   COROUTINE_BEGIN();
 
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -187,10 +207,12 @@ COROUTINE(targetLostRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(pickedUpRoutine) {
+COROUTINE(pickedUpRoutine)
+{
   COROUTINE_BEGIN();
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -198,8 +220,10 @@ COROUTINE(pickedUpRoutine) {
 
   static unsigned long nextAudioClipTime = 0;
 
-  while (true) {
-    if (fullyOpened) {
+  while (true)
+  {
+    if (fullyOpened)
+    {
       float t = millis() / 1000.0 * 5.0;
       uint16_t s = t * 255;
       servos.SetRotateAngle(map(constrain(inoise8_raw(s) * 2, -100, 100), -100,
@@ -208,7 +232,8 @@ COROUTINE(pickedUpRoutine) {
                                 settings.centerAngle + settings.maxRotation));
     }
 #ifdef USE_AUDIO
-    if (millis() > nextAudioClipTime) {
+    if (millis() > nextAudioClipTime)
+    {
       nextAudioClipTime = millis() + 2500;
       audio.PlaySound(5, random(1, 11));
     }
@@ -219,7 +244,8 @@ COROUTINE(pickedUpRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(shutdownRoutine) {
+COROUTINE(shutdownRoutine)
+{
   COROUTINE_BEGIN();
 
   static unsigned long fromTime;
@@ -227,7 +253,8 @@ COROUTINE(shutdownRoutine) {
   static unsigned long t;
   static unsigned long closingStartTime;
 #ifdef USE_AUDIO
-  if (audio.IsPlayingAudio()) {
+  if (audio.IsPlayingAudio())
+  {
     audio.Stop();
     COROUTINE_AWAIT(!audio.IsPlayingAudio());
   }
@@ -247,7 +274,8 @@ COROUTINE(shutdownRoutine) {
 
   fromTime = t = millis();
   toTime = fromTime + 2000;
-  while (t < toTime) {
+  while (t < toTime)
+  {
     t = millis();
     if (t > toTime)
       t = toTime;
@@ -257,7 +285,7 @@ COROUTINE(shutdownRoutine) {
     leds.SetCenterLEDBrightness(red);
 
     leds.FillLEDRing();
-    
+
     COROUTINE_YIELD();
   }
 
@@ -269,7 +297,8 @@ COROUTINE(shutdownRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(rebootRoutine) {
+COROUTINE(rebootRoutine)
+{
   COROUTINE_BEGIN();
 
   static unsigned long fromTime;
@@ -281,7 +310,8 @@ COROUTINE(rebootRoutine) {
 
   fromTime = t = millis();
   toTime = fromTime + 500;
-  while (t < toTime) {
+  while (t < toTime)
+  {
     t = millis();
     if (t > toTime)
       t = toTime;
@@ -297,11 +327,14 @@ COROUTINE(rebootRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(manualEngagingRoutine) {
+COROUTINE(manualEngagingRoutine)
+{
   COROUTINE_BEGIN();
-  if (fullyOpened) {
+  if (fullyOpened)
+  {
 #ifdef USE_AUDIO
-    if (audio.IsPlayingAudio()) {
+    if (audio.IsPlayingAudio())
+    {
       audio.Stop();
       COROUTINE_AWAIT(!audio.IsPlayingAudio());
     }
@@ -318,7 +351,8 @@ COROUTINE(manualEngagingRoutine) {
 
     COROUTINE_DELAY(200);
 
-    while (toTime > millis()) {
+    while (toTime > millis())
+    {
       leds.ToggleGUNLEDs(true);
       COROUTINE_DELAY(5);
       leds.ToggleGUNLEDs(false);
@@ -328,12 +362,16 @@ COROUTINE(manualEngagingRoutine) {
   COROUTINE_END();
 }
 
-COROUTINE(manualMovementRoutine) {
+COROUTINE(manualMovementRoutine)
+{
   static int8_t currentRotateDirection = 0;
   static int currentRotateAngle = settings.centerAngle;
-  COROUTINE_LOOP() {
-    if (currentRotateDirection != 0) {
-      if (fullyOpened) {
+  COROUTINE_LOOP()
+  {
+    if (currentRotateDirection != 0)
+    {
+      if (fullyOpened)
+      {
         currentRotateAngle += currentRotateDirection;
         currentRotateAngle = constrain(
             currentRotateAngle, settings.centerAngle - settings.maxRotation,

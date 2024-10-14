@@ -2,14 +2,15 @@
 #define PT_SENSORS
 
 #include <Arduino.h>
-#include "Settings.h"
 #include <Adafruit_ADXL345_U.h>
 #include <Adafruit_Sensor.h>
-#include "pins.h"
+#include "Pins.h"
+#include "Settings.h"
 
 #define MEASUREMENTS 10
 
-class Sensors {
+class Sensors
+{
 public:
   int32_t smoothX;
   int32_t smoothY;
@@ -17,11 +18,14 @@ public:
   bool accelerometerBuffered;
 
   Sensors(Settings &settingsIn)
-    : settings(settingsIn) {
+      : settings(settingsIn)
+  {
   }
 
-  void Begin() {
+  void Begin()
+  {
     Serial.println("Starting up: sensors");
+    logData("Starting up: sensors");
     pinMode(WING_SWITCH, INPUT_PULLUP);
 #ifndef LEGACY
     pinMode(PID, INPUT);
@@ -30,17 +34,21 @@ public:
     Wire.setPins(SDA, SCL);
 #endif
     accel = Adafruit_ADXL345_Unified();
-    if (!accel.begin()) {
-        Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
+    if (!accel.begin())
+    {
+      Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
+      logData("Ooops, no ADXL345 detected ... Check your wiring!");
     }
     wasOpen = WingsAreOpen();
   }
 
-  bool WingsAreOpen() {
+  bool WingsAreOpen()
+  {
     return digitalRead(WING_SWITCH) == HIGH;
   }
 
-  void UpdateSensors() {
+  void UpdateSensors()
+  {
     sensors_event_t event;
     accel.getEvent(&event);
 
@@ -57,18 +65,19 @@ public:
     smoothZ += accelZ[currentMeasurement];
 
     currentMeasurement++;
-    if (currentMeasurement >= MEASUREMENTS) {
+    if (currentMeasurement >= MEASUREMENTS)
+    {
       accelerometerBuffered = true;
       currentMeasurement = 0;
     }
-
 
     // For some reason we need to cache this value, as checking it every loop
     // causes the webserver to freeze.
     // So we check every 500ms
     // https://github.com/me-no-dev/ESPAsyncWebServer/issues/944
     unsigned long curMillis = millis();
-    if (curMillis > lastMotionCheckMillis + 500) {
+    if (curMillis > lastMotionCheckMillis + 500)
+    {
 #ifdef LEGACY
       isDetectingMotion = digitalRead(PID) == HIGH;
 #else
@@ -77,7 +86,8 @@ public:
     }
   }
 
-  bool IsDetectingMotion() {
+  bool IsDetectingMotion()
+  {
     return isDetectingMotion;
   }
 

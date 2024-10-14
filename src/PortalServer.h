@@ -23,7 +23,7 @@
 
 AsyncWebServer server = AsyncWebServer(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
-WebSocketsServer webSocketVarLog = WebSocketsServer(82);
+// WebSocketsServer webSocketVarLog = WebSocketsServer(82);
 DNSServer dnsServer;
 #include <WiFiUdp.h>
 WiFiUDP udp;
@@ -33,22 +33,27 @@ const byte DNS_PORT = 53;
 bool websocketStarted;
 unsigned long nextWebSocketUpdateTime = 0;
 
-void RequestReboot() {
-  while (true) {
+void RequestReboot()
+{
+  while (true)
+  {
     int i = 0;
   }
 }
 
-void UpdateServer() {
+void UpdateServer()
+{
   webSocket.loop();
   webSocketVarLog.loop();
   ArduinoOTA.handle();
 
-  if (useCaptive) {
+  if (useCaptive)
+  {
     dnsServer.processNextRequest();
   }
 
-  if (websocketStarted && millis() > nextWebSocketUpdateTime) {
+  if (websocketStarted && millis() > nextWebSocketUpdateTime)
+  {
 
     nextWebSocketUpdateTime = millis() + 30;
     int a = analogRead(A0);
@@ -75,10 +80,11 @@ void UpdateServer() {
   }
 }
 
-void StartWebServer() {
+void StartWebServer()
+{
 
   Serial.println("Start webserver");
-  webSocketVarLog.broadcastTXT("Hello");
+  // webSocketVarLog.broadcastTXT("Hello");
   udp.beginPacket(IPAddress(255, 255, 255, 255), 1337);
   udp.print("portalturret::discovery");
   udp.endPacket();
@@ -88,7 +94,8 @@ void StartWebServer() {
   //    request->send(LittleFS, "index.html", String(), false, processor);
   //  });
 
-  ArRequestHandlerFunction siteHandler = [](AsyncWebServerRequest *request) {
+  ArRequestHandlerFunction siteHandler = [](AsyncWebServerRequest *request)
+  {
     AsyncWebServerResponse *response = request->beginResponse_P(
         200, "text/html", index_html_gz, index_html_gz_len);
     response->addHeader("Content-Encoding", "gzip");
@@ -103,81 +110,97 @@ void StartWebServer() {
   server.onNotFound(siteHandler);
 
   ArRequestHandlerFunction settingsHandler =
-      [&](AsyncWebServerRequest *request) {
-        if (request->hasParam("ssid", true) && request->hasParam("pw", true)) {
-          settings.wifiSSID = request->getParam("ssid", true)->value();
-          settings.wifiPassword = request->getParam("pw", true)->value();
-        }
-        if (request->hasParam("language", true)) {
-          settings.language =
-              request->getParam("language", true)->value();
-        }
-        if (request->hasParam("audioUrl", true)) {
-          settings.audioUrl =
-              request->getParam("audioUrl", true)->value();
-        }
-        if (request->hasParam("audioVolume", true)) {
-          settings.audioVolume =
-              request->getParam("audioVolume", true)->value().toInt() & 0xFF;
-        }
-        if (request->hasParam("startInManualMode", true)) {
-          settings.startInManualMode =
-              request->getParam("startInManualMode", true)->value().toInt();
-        }
-        if (request->hasParam("centerAngle", true)) {
-          settings.centerAngle =
-              request->getParam("centerAngle", true)->value().toInt();
-        }
-        if (request->hasParam("idleAngle", true)) {
-          settings.idleAngle =
-              request->getParam("idleAngle", true)->value().toInt();
-        }
-        if (request->hasParam("wingRotateDirection", true)) {
-          settings.wingRotateDirection =
-              request->getParam("wingRotateDirection", true)->value().toInt();
-        }
-        if (request->hasParam("wingPin", true)) {
-          settings.wingPin =
-              request->getParam("wingPin", true)->value().toInt();
-        }
-        if (request->hasParam("rotatePin", true)) {
-          settings.rotatePin =
-              request->getParam("rotatePin", true)->value().toInt();
-        }
-        if (request->hasParam("openDuration", true)) {
-          settings.openDuration =
-              request->getParam("openDuration", true)->value().toInt();
-        }
-        if (request->hasParam("maxRotation", true)) {
-          settings.maxRotation =
-              request->getParam("maxRotation", true)->value().toInt();
-        }
-        if (request->hasParam("panicTreshold", true)) {
-          settings.panicTreshold =
-              request->getParam("panicTreshold", true)->value().toFloat();
-        }
-        if (request->hasParam("restTreshold", true)) {
-          settings.restTreshold =
-              request->getParam("restTreshold", true)->value().toFloat();
-        }
-        if (request->hasParam("tippedOverTreshold", true)) {
-          settings.tippedOverTreshold =
-              request->getParam("tippedOverTreshold", true)->value().toFloat();
-        }
+      [&](AsyncWebServerRequest *request)
+  {
+    if (request->hasParam("ssid", true) && request->hasParam("pw", true))
+    {
+      settings.wifiSSID = request->getParam("ssid", true)->value();
+      settings.wifiPassword = request->getParam("pw", true)->value();
+    }
+    if (request->hasParam("language", true))
+    {
+      settings.language =
+          request->getParam("language", true)->value();
+    }
+    if (request->hasParam("audioUrl", true))
+    {
+      settings.audioUrl =
+          request->getParam("audioUrl", true)->value();
+    }
+    if (request->hasParam("audioVolume", true))
+    {
+      settings.audioVolume =
+          request->getParam("audioVolume", true)->value().toInt() & 0xFF;
+    }
+    if (request->hasParam("startInManualMode", true))
+    {
+      settings.startInManualMode =
+          request->getParam("startInManualMode", true)->value().toInt();
+    }
+    if (request->hasParam("centerAngle", true))
+    {
+      settings.centerAngle =
+          request->getParam("centerAngle", true)->value().toInt();
+    }
+    if (request->hasParam("idleAngle", true))
+    {
+      settings.idleAngle =
+          request->getParam("idleAngle", true)->value().toInt();
+    }
+    if (request->hasParam("wingRotateDirection", true))
+    {
+      settings.wingRotateDirection =
+          request->getParam("wingRotateDirection", true)->value().toInt();
+    }
+    if (request->hasParam("wingPin", true))
+    {
+      settings.wingPin =
+          request->getParam("wingPin", true)->value().toInt();
+    }
+    if (request->hasParam("rotatePin", true))
+    {
+      settings.rotatePin =
+          request->getParam("rotatePin", true)->value().toInt();
+    }
+    if (request->hasParam("openDuration", true))
+    {
+      settings.openDuration =
+          request->getParam("openDuration", true)->value().toInt();
+    }
+    if (request->hasParam("maxRotation", true))
+    {
+      settings.maxRotation =
+          request->getParam("maxRotation", true)->value().toInt();
+    }
+    if (request->hasParam("panicTreshold", true))
+    {
+      settings.panicTreshold =
+          request->getParam("panicTreshold", true)->value().toFloat();
+    }
+    if (request->hasParam("restTreshold", true))
+    {
+      settings.restTreshold =
+          request->getParam("restTreshold", true)->value().toFloat();
+    }
+    if (request->hasParam("tippedOverTreshold", true))
+    {
+      settings.tippedOverTreshold =
+          request->getParam("tippedOverTreshold", true)->value().toFloat();
+    }
 
-        settings.SaveSettings();
-        request->send(200, "text/html", "ok");
-        RequestReboot();
-      };
+    settings.SaveSettings();
+    request->send(200, "text/html", "ok");
+    RequestReboot();
+  };
 
   server.on("/setup", HTTP_POST, settingsHandler);
   server.on("/settings", HTTP_POST, settingsHandler);
 
-  server.on("/get_settings", HTTP_GET, [&](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", settings.SettingsToJSON());
-  });
+  server.on("/get_settings", HTTP_GET, [&](AsyncWebServerRequest *request)
+            { request->send(200, "application/json", settings.SettingsToJSON()); });
 
-  server.on("/scan", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/scan", HTTP_GET, [&](AsyncWebServerRequest *request)
+            {
     String json = "[";
     int n = WiFi.scanComplete();
     if (n == -2) {
@@ -203,10 +226,10 @@ void StartWebServer() {
       }
     }
     json += "]";
-    request->send(200, "application/json", json);
-  });
+    request->send(200, "application/json", json); });
 
-  server.on("/set_mode", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/set_mode", HTTP_POST, [&](AsyncWebServerRequest *request)
+            {
     if (request->hasParam("mode", true)) {
       AsyncWebParameter *modeParam = request->getParam("mode", true);
       currentTurretMode = (TurretMode)modeParam->value().toInt();
@@ -216,10 +239,10 @@ void StartWebServer() {
                                                                : "Manual");
     } else {
       request->send(200, "text/html", "Failed to set mode");
-    }
-  });
+    } });
 
-  server.on("/set_state", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/set_state", HTTP_POST, [&](AsyncWebServerRequest *request)
+            {
     if (request->hasParam("state", true)) {
       AsyncWebParameter *stateParam = request->getParam("state", true);
       int state = stateParam->value().toInt();
@@ -227,10 +250,10 @@ void StartWebServer() {
       request->send(200, "text/html", "State set");
     } else {
       request->send(200, "text/html", "No state sent");
-    }
-  });
+    } });
 
-  server.on("/diagnose", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/diagnose", HTTP_POST, [&](AsyncWebServerRequest *request)
+            {
     if (request->hasParam("action", true)) {
       AsyncWebParameter *stateParam = request->getParam("action", true);
       diagnoseMode = true;
@@ -238,10 +261,10 @@ void StartWebServer() {
       request->send(200, "text/html", "Diagnose");
     } else {
       request->send(200, "text/html", "No Action Sent");
-    }
-  });
+    } });
 
-  server.on("/set_open", HTTP_POST, [](AsyncWebServerRequest *request) {
+  server.on("/set_open", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
     if (currentTurretMode == TurretMode::Manual) {
       if (request->hasParam("open", true)) {
         AsyncWebParameter *openParam = request->getParam("open", true);
@@ -257,8 +280,7 @@ void StartWebServer() {
       }
     } else {
       request->send(200, "text/html", "Not in Manual mode");
-    }
-  });
+    } });
 
   // server.on("/set_angle", HTTP_POST, [&](AsyncWebServerRequest *request) {
   //   if (request->hasParam("angle", true)) {
@@ -279,13 +301,13 @@ void StartWebServer() {
   //   }
   // });
 
-  server.on("/reset_wifi", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/reset_wifi", HTTP_GET, [&](AsyncWebServerRequest *request)
+            {
     WiFi.disconnect();
     settings.wifiSSID = "";
     settings.wifiPassword = "";
     settings.SaveSettings();
-    request->send(200, "text/html", "Wifi reset");
-  });
+    request->send(200, "text/html", "Wifi reset"); });
 
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
@@ -294,18 +316,22 @@ void StartWebServer() {
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
-                    size_t lenght) {
+                    size_t lenght)
+{
   uint8_t transferType;
 
   // When a WebSocket message is received
-  switch (type) {
+  switch (type)
+  {
   case WStype_ERROR:
     // Serial.printf("Error: [%f]", payload);
     break;
   case WStype_BIN:
-    switch (payload[0]) {
+    switch (payload[0])
+    {
     case 0:
-      if (sensors.WingsAreOpen()) {
+      if (sensors.WingsAreOpen())
+      {
         servos.SetRotateAngle(payload[1]);
       }
       break;
@@ -320,14 +346,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
     }
     break;
   case WStype_TEXT:
-      // USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
+    // USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
 
-      // send message to client
-      // webSocket.sendTXT(num, "message here");
+    // send message to client
+    // webSocket.sendTXT(num, "message here");
 
-      // send data to all connected clients
-      webSocket.broadcastTXT("message here");
-      break;
+    // send data to all connected clients
+    webSocket.broadcastTXT("message here");
+    break;
   case WStype_DISCONNECTED: // if the websocket is disconnected
     break;
   case WStype_CONNECTED: // if a new websocket connection is established
@@ -338,25 +364,32 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
   }
 }
 
-void StartWebSocket() {
+void StartWebSocket()
+{
   // Start a WebSocket server
   webSocket.begin();
-  webSocketVarLog.begin();
+  // webSocketVarLog.begin();
   webSocket.onEvent(webSocketEvent); // if there's an incomming websocket
                                      // message, go to function 'webSocketEvent'
-  webSocketVarLog.onEvent(webSocketEvent); // if there's an incomming websocket
-                                           // message, go to function 'webSocketEvent'
+  // webSocketVarLog.onEvent(webSocketEvent); // if there's an incomming websocket
+  //                                          // message, go to function 'webSocketEvent'
+
+  webSocketVarLog.begin();
+  webSocketVarLog.onEvent(onWebSocketEvent); // Attach WebSocket event handler
+
   websocketStarted = true;
   // Serial.println("WebSocket server started.");
 }
 
-String processor(const String &var) {
+String processor(const String &var)
+{
   if (var == "IP")
     return WiFi.localIP().toString();
   return String();
 }
 
-void StartServer() {
+void StartServer()
+{
 
   WiFi.hostname("turret");
   WiFi.mode(WIFI_STA);
@@ -364,17 +397,20 @@ void StartServer() {
 
   unsigned long m = millis();
   Serial.println("Starting wifi @ " + settings.wifiSSID + "/" + settings.wifiPassword);
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     leds.UpdateLEDPreloader();
     Serial.print(".");
     delay(50);
-    if (m + 10000 < millis()) {
+    if (m + 10000 < millis())
+    {
       WiFi.disconnect();
       break;
     }
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     Serial.println("Not connected");
     WiFi.disconnect();
     WiFi.mode(WIFI_AP);
@@ -391,18 +427,22 @@ void StartServer() {
     WiFi.softAPConfig(local_IP, gateway, subnet);
     WiFi.softAP("Portal Turret");
     dnsServer.start(DNS_PORT, "*", local_IP);
-
-  } else {
+  }
+  else
+  {
     Serial.println("Connected");
     Serial.println(WiFi.localIP());
 #ifdef HARDWARE_V3
     char filename[256];
-    for (int folder = 1; folder <= sizeof(sounds_number); folder++) {
+    for (int folder = 1; folder <= sizeof(sounds_number); folder++)
+    {
       snprintf(filename, 255, "/%02i", folder);
       LittleFS.mkdir(filename);
-      for (int filenum = 1; filenum <= sounds_number[folder-1]; filenum++) {
+      for (int filenum = 1; filenum <= sounds_number[folder - 1]; filenum++)
+      {
         snprintf(filename, 255, "/%02i/%03i.mp3", folder, filenum);
-        if (!LittleFS.exists(filename)) {
+        if (!LittleFS.exists(filename))
+        {
           downloadFile(filename, filename);
           leds.UpdateLEDSystem();
         }
@@ -411,40 +451,49 @@ void StartServer() {
 #endif
   }
 
-  if (!digitalRead(0)) {
+  if (!digitalRead(0))
+  {
     int i = 0;
-    while (!digitalRead(0)) {
+    while (!digitalRead(0))
+    {
       delay(200);
       leds.UpdateLEDSystem();
-      i+=1;
+      i += 1;
       if (i > 10)
         break;
     }
-    if (!digitalRead(0)) {
+    if (!digitalRead(0))
+    {
       LittleFS.format();
     }
   }
 
-
   AsyncElegantOTA.begin(&server);
-  ArduinoOTA.onStart([]() {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH) {
-      type = "sketch";
-    } else { // U_FS
-      type = "filesystem";
-    }
+  ArduinoOTA.onStart([]()
+                     {
+                       String type;
+                       if (ArduinoOTA.getCommand() == U_FLASH)
+                       {
+                         type = "sketch";
+                       }
+                       else
+                       { // U_FS
+                         type = "filesystem";
+                       }
 
-    // NOTE: if updating FS this would be the place to unmount FS using
-    // FS.end() Serial.println("Start updating " + type);
-  });
-  ArduinoOTA.onEnd([]() {
-    // Serial.println("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
+                       // NOTE: if updating FS this would be the place to unmount FS using
+                       // FS.end() Serial.println("Start updating " + type);
+                     });
+  ArduinoOTA.onEnd([]()
+                   {
+                     // Serial.println("\nEnd");
+                   });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+                        {
+                          // Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+                        });
+  ArduinoOTA.onError([](ota_error_t error)
+                     {
     // Serial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) {
       // Serial.println("Auth Failed");
@@ -456,8 +505,7 @@ void StartServer() {
       // Serial.println("Receive Failed");
     } else if (error == OTA_END_ERROR) {
       // Serial.println("End Failed");
-    }
-  });
+    } });
   ArduinoOTA.setHostname("turret");
   ArduinoOTA.begin();
 

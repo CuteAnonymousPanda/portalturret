@@ -4,9 +4,11 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
+#include "Logger.h"
 #include "Pins.h"
 
-class Settings {
+class Settings
+{
 public:
   String wifiSSID;
   String wifiPassword;
@@ -26,8 +28,10 @@ public:
   float tippedOverTreshold = 5;
 
   Settings() {}
-  void Begin() {
-    if (!LittleFS.begin()) {
+  void Begin()
+  {
+    if (!LittleFS.begin())
+    {
       Serial.println("Littlefs error. Formatting...");
       LittleFS.format();
       LittleFS.begin();
@@ -35,19 +39,25 @@ public:
 
     // static Settings settings;
     Serial.println("Loading settings...");
+    logData("Loading settings...");
 
     File file = LittleFS.open(settingsFilePath, "r");
-    if (!file) {
+    if (!file)
+    {
       Serial.println("Failed to open settings file for reading");
-      return;  // Return default settings
+      logData("Failed to open settings file for reading");
+      return; // Return default settings
     }
+    logData(SettingsToJSON());
 
     // Create a JSON document to read the settings
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, file);
-    if (error) {
+    if (error)
+    {
       Serial.println("Failed to parse settings file");
-      return;  // Return default settings
+      logData("Failed to parse settings file");
+      return; // Return default settings
     }
 
     // Assign values from JSON to settings structure
@@ -89,10 +99,13 @@ public:
   }
 
   // Function to save settings to the filesystem
-  void SaveSettings() {
+  void SaveSettings()
+  {
     Serial.println("Saving settings");
+    logData("Saving settings");
     File file = LittleFS.open(settingsFilePath, "w");
-    if (!file) {
+    if (!file)
+    {
       Serial.println("Failed to open settings file for writing");
       return;
     }
@@ -117,18 +130,22 @@ public:
     doc["startInManualMode"] = startInManualMode;
 
     Serial.println("Updated JSON");
+    logData("Updated JSON");
 
     // Serialize JSON to file
-    if (serializeJson(doc, file) == 0) {
+    if (serializeJson(doc, file) == 0)
+    {
       Serial.println("Failed to write to settings file");
     }
 
     Serial.println("Saved settings to file");
+    logData("Saved settings to file");
 
     file.close();
   }
 
-  String SettingsToJSON() {
+  String SettingsToJSON()
+  {
     String json = "{";
     json += "\"language\":\"" + language + "\",";
     json += "\"audioUrl\":\"" + audioUrl + "\",";

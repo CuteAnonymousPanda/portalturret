@@ -1,12 +1,12 @@
 // General
 #include <Arduino.h>
-#include "pins.h"
+#include "Pins.h"
 
 #ifdef LEGACY
 #include <Adafruit_PWMServoDriver.h>
-#define FREQ 50 // one clock is 20 ms
-#define FREQ_MINIMUM 205  // 1ms is 1/20, of 4096
-#define FREQ_MAXIMUM 410  // 2ms is 2/20, of 4096
+#define FREQ 50          // one clock is 20 ms
+#define FREQ_MINIMUM 205 // 1ms is 1/20, of 4096
+#define FREQ_MAXIMUM 410 // 2ms is 2/20, of 4096
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #endif
 
@@ -54,8 +54,8 @@ LEDs leds;
 #include "StateBehaviour.h"
 #include "PortalServer.h"
 
-void setup() {
-
+void setup()
+{
 #ifdef LEGACY
   pwm.begin();
   pwm.setPWMFreq(FREQ);
@@ -66,7 +66,8 @@ void setup() {
 #ifdef WAIT_FOR_SERIAL
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  while (!Serial) {
+  while (!Serial)
+  {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     delay(100);
   }
@@ -95,7 +96,8 @@ void setup() {
   leds.FillLEDRing();
 }
 
-void loop() {
+void loop()
+{
   sensors.UpdateSensors();
   leds.UpdateLEDs();
   UpdateStateBehaviour();

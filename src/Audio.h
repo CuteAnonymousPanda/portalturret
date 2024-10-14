@@ -2,19 +2,21 @@
 #define PT_AUDIO
 
 #include <Arduino.h>
-#include "Settings.h"
-#include <SoftwareSerial.h>
 #include <DFRobotDFPlayerMini.h>
-
+#include <SoftwareSerial.h>
 #include "Pins.h"
+#include "Settings.h"
 
-class Audio {
+class Audio
+{
 public:
   Audio(Settings &settings, SoftwareSerial &softwareSerial)
-    : settings(settings), softwareSerial(softwareSerial) {
+      : settings(settings), softwareSerial(softwareSerial)
+  {
   }
 
-  void Begin() {
+  void Begin()
+  {
     pinMode(AUDIO_BUSY, INPUT);
 
     softwareSerial.begin(9600);
@@ -23,15 +25,18 @@ public:
     myDFPlayer.volume(settings.audioVolume);
   }
 
-  void PlaySound(uint8_t folder, uint8_t file) {
+  void PlaySound(uint8_t folder, uint8_t file)
+  {
     myDFPlayer.playFolder(folder, file);
   }
 
-  void Stop() {
+  void Stop()
+  {
     myDFPlayer.stop();
   }
 
-  bool IsPlayingAudio() {
+  bool IsPlayingAudio()
+  {
 #ifdef LEGACY
     return analogRead(AUDIO_BUSY) < 0XFF;
 #else

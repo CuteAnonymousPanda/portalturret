@@ -5,9 +5,15 @@
 #include "Servos.h"
 #include "Settings.h"
 
-enum class TurretMode { Automatic = 0, Manual = 1, Idle = 2 };
+enum class TurretMode
+{
+  Automatic = 0,
+  Manual = 1,
+  Idle = 2
+};
 
-enum class TurretState {
+enum class TurretState
+{
   Idle = 0,
   Activated = 1,
   Searching = 2,
@@ -19,7 +25,8 @@ enum class TurretState {
   Rebooting = 8,
 };
 
-enum class ManualState {
+enum class ManualState
+{
   Idle,
   Opening,
   Closing,
@@ -38,34 +45,45 @@ unsigned long lastMovementTime = 0;
 bool diagnoseMode;
 int diagnoseAction;
 
-void setState(TurretState nextState) {
+void setState(TurretState nextState)
+{
   // Stop the Wing Servos just in case;
   servos.SetWingAngle(settings.idleAngle);
 
-  if (currentTurretMode == TurretMode::Automatic) {
-    switch (nextState) {
+  if (currentTurretMode == TurretMode::Automatic)
+  {
+    switch (nextState)
+    {
     case TurretState::Activated:
+      logData("Turret state: activated");
       activatedRoutine.reset();
       break;
     case TurretState::Engaging:
+      logData("Turret state: engaging");
       engagingRoutine.reset();
       break;
     case TurretState::Searching:
+      logData("Turret state: searching");
       searchingRoutine.reset();
       break;
     case TurretState::TargetLost:
+      logData("Turret state: target lost");
       targetLostRoutine.reset();
       break;
     case TurretState::PickedUp:
+      logData("Turret state: picked up");
       pickedUpRoutine.reset();
       break;
     case TurretState::Shutdown:
+      logData("Turret state: shutdown");
       shutdownRoutine.reset();
       break;
     case TurretState::ManualEngaging:
+      logData("Turret state: manual engaging");
       manualEngagingRoutine.reset();
       break;
     case TurretState::Rebooting:
+      logData("Turret state: rebooting");
       rebootRoutine.reset();
       break;
     }
@@ -74,12 +92,15 @@ void setState(TurretState nextState) {
   }
 }
 
-void setManualState(ManualState nextState) {
+void setManualState(ManualState nextState)
+{
   // Stop the Wing Servos just in case;
   servos.SetWingAngle(settings.idleAngle);
 
-  if (currentTurretMode == TurretMode::Manual) {
-    switch (nextState) {
+  if (currentTurretMode == TurretMode::Manual)
+  {
+    switch (nextState)
+    {
     case ManualState::Opening:
       openWingsRoutine.reset();
       break;
@@ -94,42 +115,52 @@ void setManualState(ManualState nextState) {
   }
 }
 
-void manualRotation(unsigned long deltaTime) {
+void manualRotation(unsigned long deltaTime)
+{
+  logData("Manually rotating");
   manualMovementRoutine.runCoroutine();
 }
 
-void UpdateStateBehaviour() {
-  if (!diagnoseMode) {
+void UpdateStateBehaviour()
+{
+  if (!diagnoseMode)
+  {
     unsigned long deltaTime = millis() - previousTime;
     previousTime = millis();
 
-    if (currentTurretMode == TurretMode::Manual) {
-      switch (currentManualState) {
+    if (currentTurretMode == TurretMode::Manual)
+    {
+      switch (currentManualState)
+      {
       case ManualState::Idle:
         manualRotation(deltaTime);
         break;
       case ManualState::Opening:
         openWingsRoutine.runCoroutine();
-        if (openWingsRoutine.isDone()) {
+        if (openWingsRoutine.isDone())
+        {
           setManualState(ManualState::Idle);
         }
         break;
       case ManualState::Closing:
         closeWingsRoutine.runCoroutine();
-        if (closeWingsRoutine.isDone()) {
+        if (closeWingsRoutine.isDone())
+        {
           setManualState(ManualState::Idle);
         }
         break;
       case ManualState::Firing:
         manualRotation(deltaTime);
         manualEngagingRoutine.runCoroutine();
-        if (manualEngagingRoutine.isDone()) {
+        if (manualEngagingRoutine.isDone())
+        {
           setManualState(ManualState::Idle);
         }
         break;
       }
     }
-    if (currentTurretMode == TurretMode::Automatic) {
+    if (currentTurretMode == TurretMode::Automatic)
+    {
 
       bool motionDetected = sensors.IsDetectingMotion();
 
@@ -153,80 +184,103 @@ void UpdateStateBehaviour() {
       bool onItsSide = sensors.accelerometerBuffered &&
                        (zMovement < settings.tippedOverTreshold);
 
-      if (movedAround) {
+      if (movedAround)
+      {
         lastMovementTime = millis();
       }
 
       if (pickedUp && currentState != TurretState::PickedUp &&
           currentState != TurretState::Shutdown &&
-          currentState != TurretState::Rebooting) {
+          currentState != TurretState::Rebooting)
+      {
         setState(TurretState::PickedUp);
       }
-      switch (currentState) {
+      switch (currentState)
+      {
       case TurretState::Idle:
-        if (motionDetected) {
+        if (motionDetected)
+        {
           setState(TurretState::Activated);
         }
         break;
       case TurretState::Activated:
         activatedRoutine.runCoroutine();
-        if (activatedRoutine.isDone()) {
-          if (motionDetected) {
+        if (activatedRoutine.isDone())
+        {
+          if (motionDetected)
+          {
             setState(TurretState::Engaging);
-          } else {
+          }
+          else
+          {
             setState(TurretState::Searching);
           }
         }
         break;
       case TurretState::Searching:
         searchingRoutine.runCoroutine();
-        if (millis() > stateStartTime + 10000) {
+        if (millis() > stateStartTime + 10000)
+        {
           setState(TurretState::TargetLost);
         }
-        if (motionDetected && millis() > stateStartTime + 100) {
+        if (motionDetected && millis() > stateStartTime + 100)
+        {
           setState(TurretState::Engaging);
         }
         break;
       case TurretState::TargetLost:
         targetLostRoutine.runCoroutine();
-        if (targetLostRoutine.isDone()) {
+        if (targetLostRoutine.isDone())
+        {
           setState(TurretState::Idle);
         }
         break;
       case TurretState::Engaging:
         engagingRoutine.runCoroutine();
-        if (engagingRoutine.isDone()) {
-          if (sensors.WingsAreOpen()) {
+        if (engagingRoutine.isDone())
+        {
+          if (sensors.WingsAreOpen())
+          {
             setState(TurretState::Searching);
-          } else {
+          }
+          else
+          {
             setState(TurretState::Idle);
           }
         }
         break;
       case TurretState::PickedUp:
         pickedUpRoutine.runCoroutine();
-        if (onItsSide) {
+        if (onItsSide)
+        {
           setState(TurretState::Shutdown);
-        } else if (!movedAround && millis() > lastMovementTime + 5000) {
+        }
+        else if (!movedAround && millis() > lastMovementTime + 5000)
+        {
           setState(TurretState::Activated);
         }
         break;
       case TurretState::Shutdown:
         shutdownRoutine.runCoroutine();
-        if (shutdownRoutine.isDone() && !onItsSide) {
+        if (shutdownRoutine.isDone() && !onItsSide)
+        {
           setState(TurretState::Rebooting);
         }
         break;
       case TurretState::Rebooting:
         rebootRoutine.runCoroutine();
-        if (rebootRoutine.isDone()) {
+        if (rebootRoutine.isDone())
+        {
           setState(TurretState::Idle);
         }
         break;
       }
     }
-  } else if(currentTurretMode == TurretMode::Manual) {
-    switch (diagnoseAction) {
+  }
+  else if (currentTurretMode == TurretMode::Manual)
+  {
+    switch (diagnoseAction)
+    {
     case 0:
       servos.SetWingAngle(settings.idleAngle -
                           settings.wingRotateDirection * 90);
@@ -261,7 +315,8 @@ void UpdateStateBehaviour() {
       audio.PlaySound(1, random(1, 9));
       break;
     case 7:
-      for(int i = 0; i < 5; i++) {
+      for (int i = 0; i < 5; i++)
+      {
         leds.SetCenterLEDBrightness(255);
         delay(500);
         leds.SetCenterLEDBrightness(0);
