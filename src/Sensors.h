@@ -77,6 +77,7 @@ public:
     // https://github.com/me-no-dev/ESPAsyncWebServer/issues/944
     unsigned long curMillis = millis();
     if (curMillis > lastMotionCheckMillis + 500) {
+      lastMotionCheckMillis = curMillis;
 #ifdef LEGACY
       isDetectingMotion = digitalRead(PID) == HIGH;
 #else
