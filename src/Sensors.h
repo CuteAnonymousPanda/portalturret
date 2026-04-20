@@ -19,8 +19,6 @@ public:
   Sensors(Settings &settingsIn)
     : settings(settingsIn),
       currentMeasurement(0),
-      wingsOpen(false),
-      wasOpen(false),
       isDetectingMotion(false),
       lastMotionCheckMillis(0) {
     memset(accelX, 0, sizeof(accelX));
@@ -101,9 +99,6 @@ private:
   int16_t accelX[MEASUREMENTS];
   int16_t accelY[MEASUREMENTS];
   int16_t accelZ[MEASUREMENTS];
-
-  bool wingsOpen;
-  bool wasOpen;
 
   bool isDetectingMotion;
   unsigned long lastMotionCheckMillis;
