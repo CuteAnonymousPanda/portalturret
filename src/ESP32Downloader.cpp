@@ -4,25 +4,25 @@
 #include <LittleFS.h>
 #include "config.h"
 
-#include <WiFiClient.h>
-WiFiClient* wifiClient = nullptr;
+#include <WiFiClientSecure.h>
 
 #define PREFIX "https://joranderaaff.nl/portal-sentry/audio/english"
 
 void downloadFile(const char* urlPath, const char* filePath) {
-  String fullUrl = String(PREFIX) + String(urlPath);
-  if (wifiClient == NULL) {
-    WiFiClientSecure* sslclient = new WiFiClientSecure();
-    sslclient->setInsecure();
-    wifiClient = sslclient;
+  static WiFiClientSecure sslclient;
+  static bool initialized = false;
+  if (!initialized) {
+    sslclient.setInsecure();
+    initialized = true;
   }
-  
+
+  String fullUrl = String(PREFIX) + String(urlPath);
   Serial.print("Requesting: ");
   Serial.println(fullUrl);
 
   // Start the request to download the file
   HTTPClient http;
-  http.begin(*wifiClient, fullUrl);
+  http.begin(sslclient, fullUrl);
   int statusCode = http.GET();
 
   if (statusCode == 200) {
