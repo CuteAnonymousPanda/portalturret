@@ -64,6 +64,5 @@ private:
   Sensors &sensors;
   Servo wingServo;
   Servo rotateServo;
-  int currentMoveSpeed = 0;
 };
 #endif
